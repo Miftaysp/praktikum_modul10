@@ -2,15 +2,17 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Seeder;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Employee;
 
 class EmployeeSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
+
     public function run(): void
     {
         DB::table('employees')->insert([
@@ -36,13 +38,16 @@ class EmployeeSeeder extends Seeder
                 'position_id' => 3
             ],
             [
-                'firstname' => 'Farid Duta',
-                'lastname' => 'Hadyanto',
-                'email'=> 'fariduta@gmail.com',
-                'age' => 26,
-                'position_id' => 1
-            ],
-          
+                'firstname' => 'Mifta',
+                'lastname' => 'Yulia',
+                'email'=> 'Mifta.yulia@gmail.com',
+                'age' => 20,
+                'position_id' => 2
+            ]
+
         ]);
+        Employee::factory()->count(10)->create();
+
     }
+
 }
