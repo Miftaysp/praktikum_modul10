@@ -9,6 +9,11 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Employee;
 use App\Models\Position;
+use RealRashid\SweetAlert\Facades\Alert;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\EmployeesExport;
+use PDF;
+
 
 class EmployeeController extends Controller
 {
@@ -19,14 +24,11 @@ class EmployeeController extends Controller
     {
         $pageTitle = 'Employee List';
 
-        // ELOQUENT
-        $employees = Employee::all();
+        confirmDelete();
 
-        return view('employee.index', [
-            'pageTitle' => $pageTitle,
-            'employees' => $employees
-        ]);
+        return view('employee.index', compact('pageTitle'));
     }
+
 
     /**
      * Show the form for creating a new resource.
@@ -88,6 +90,8 @@ class EmployeeController extends Controller
         }
 
         $employee->save();
+
+        Alert::success('Added Successfully', 'Employee Data Added Successfully.');
 
         return redirect()->route('employees.index');
     }
@@ -172,6 +176,8 @@ class EmployeeController extends Controller
 
         $employee->save();
 
+        Alert::success('Changed Successfully', 'Employee Data Changed Successfully.');
+
         return redirect()->route('employees.index');
     }
 
@@ -189,6 +195,8 @@ class EmployeeController extends Controller
 
         $employee->delete();
 
+        Alert::success('Deleted Successfully', 'Employee Data Deleted Successfully.');
+
         return redirect()->route('employees.index');
     }
 
@@ -205,4 +213,36 @@ class EmployeeController extends Controller
             return Storage::download($encryptedFilename, $downloadFilename);
         }
     }
+
+    /**
+     * download the form.
+     */
+    public function getData(Request $request)
+    {
+        $employees = Employee::with('position');
+
+        if ($request->ajax()) {
+            return datatables()->of($employees)
+                ->addIndexColumn()
+                ->addColumn('actions', function($employee) {
+                    return view('employee.actions', compact('employee'));
+                })
+                ->toJson();
+        }
+    }
+
+    public function exportExcel()
+    {
+        return Excel::download(new EmployeesExport, 'employees.xlsx');
+    }
+
+    public function exportPdf()
+    {
+        $employees = Employee::all();
+
+        $pdf = PDF::loadView('employee.export_pdf', compact('employees'));
+
+        return $pdf->download('employees.pdf');
+    }
+
 }
